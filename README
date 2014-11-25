@@ -1,0 +1,4 @@
+This is all Scala code; best edited in eclipse.
+
+Run "./sbt update eclipse" to build the configuration files for eclipse.
+Run "./sbt one-jar" to rebuild the distributable jar file.
