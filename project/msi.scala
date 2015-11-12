@@ -18,8 +18,7 @@ object BuildSettings {
 
   val buildOrganization = "au.edu.anu.maths"
   val buildVersion = "0.0.1"
- // val buildScalaVersion = "2.10.4"
-  val buildScalaVersion = "2.11.4"
+  val buildScalaVersion = "2.11.7"
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := buildOrganization,
@@ -29,7 +28,9 @@ object BuildSettings {
     resolvers := sonatypeResolvers ++ tqftResolvers /* ++ SonatypeSettings.publishing */,
     libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.4" % "test",
     libraryDependencies ++= Seq(junit, slf4j),
+    libraryDependencies += httpclient,
     libraryDependencies += selenium.htmlunit,
+    libraryDependencies += selenium.firefox,
     EclipseKeys.withSource := true
   )
 }
@@ -67,8 +68,8 @@ object Dependencies {
 	val guava = "com.google.guava" % "guava" % "16.0.1"
 	val findbugs = "com.google.code.findbugs" % "jsr305" % "1.3.9"
 	object selenium {
-		val firefox = "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.40.0"
-		val htmlunit = "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.40.0"
+		val firefox = "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.48.2"
+		val htmlunit = "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.48.2"
 	}
 	object lift {
 		val util = "net.liftweb" %% "lift-util" % "2.6-M2"
