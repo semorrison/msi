@@ -7,21 +7,17 @@ import java.io.BufferedInputStream
 import org.apache.http.client.HttpClient
 import org.openqa.selenium.firefox.FirefoxProfile
 import java.io.File
+import org.openqa.selenium.By
 
 /**
  * @author scott
  */
 object DownloadEchos extends App {
 
-  //  profile = Selenium::WebDriver::Firefox::Profile.new
-  //profile["browser.download.folderList"] = 2
-  //profile["browser.download.dir"] = 'C:\\'
-  //profile["browser.helperApps.neverAsk.saveToDisk"] = 'application/pdf'
-
   val id = 14944
 
   val profile = new FirefoxProfile()
-  profile.setPreference("browser.download.folderList", 2)
+  profile.setPreference("browser.download.folderList", 2) // download into browser.download.dir
   profile.setPreference("browser.download.dir", new File(".").getAbsolutePath())
   profile.setPreference("browser.helperApps.neverAsk.saveToDisk", "video/mp4")
 
@@ -43,11 +39,15 @@ object DownloadEchos extends App {
 
   driver.get(driver.findElementByCssSelector("iframe").getAttribute("src"))
 
-  while (driver.findElementsByCssSelector("img.thumbnail").asScala.isEmpty) {
+  while (driver.findElementsByCssSelector("div.echo-li-left-wrapper").asScala.isEmpty) {
     Thread.sleep(500)
   }
 
-  for (img <- driver.findElementsByCssSelector("img.thumbnail").asScala) yield {
+  for (div <- driver.findElementsByCssSelector("div.echo-li-left-wrapper").asScala) yield {
+    // TODO Also extract the date, and use that to name the file.
+    
+    val img = div.findElement(By.cssSelector("img.thumbail"))
+    
     // https://capture.anu.edu.au/echocontent/1544/4/2c924469-6647-4fbc-8efc-04a1da97f18f/synopsis/low/00444300.jpg
     val tag = img.getAttribute("src").split("/")(6)
 
