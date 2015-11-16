@@ -8,13 +8,22 @@ import org.apache.http.client.HttpClient
 import org.openqa.selenium.firefox.FirefoxProfile
 import java.io.File
 import org.openqa.selenium.By
+import java.util.Date
+import java.util.Calendar
+import org.openqa.selenium.Keys
+import org.openqa.selenium.Dimension
 
 /**
  * @author scott
  */
 object DownloadEchos extends App {
 
-  val id = 14944
+  if (args.length != 2) {
+    println("provide your username and course number as command line arguments")
+    System.exit(1)
+  }
+  val username = args(0)
+  val id = args(1) // 14944
 
   val profile = new FirefoxProfile()
   profile.setPreference("browser.download.folderList", 2) // download into browser.download.dir
@@ -23,15 +32,13 @@ object DownloadEchos extends App {
 
   val driver = new FirefoxDriver(profile)
 
-  lazy val password = StdIn.readLine
-
-  //  driver.get("http://wattle.anu.edu.au/")
-  //  driver.findElementById("username").sendKeys("u5228111")
-  //  driver.findElementById("password").sendKeys(password)
-  //  driver.findElementByCssSelector("input[type='submit']").click
+  lazy val password = {
+    println("enter password:")
+    StdIn.readLine
+  }
 
   driver.get(s"http://wattlecourses.anu.edu.au/course/view.php?id=$id")
-  driver.findElementById("username").sendKeys("u5228111")
+  driver.findElementById("username").sendKeys(username)
   driver.findElementById("password").sendKeys(password)
   driver.findElementByCssSelector("input[type='submit']").click
 
@@ -43,26 +50,42 @@ object DownloadEchos extends App {
     Thread.sleep(500)
   }
 
-  for (div <- driver.findElementsByCssSelector("div.echo-li-left-wrapper").asScala) yield {
-    // TODO Also extract the date, and use that to name the file.
-    
-    val img = div.findElement(By.cssSelector("img.thumbail"))
-    
-    // https://capture.anu.edu.au/echocontent/1544/4/2c924469-6647-4fbc-8efc-04a1da97f18f/synopsis/low/00444300.jpg
-    val tag = img.getAttribute("src").split("/")(6)
+  val course = driver.findElementById("echo-header-title").getText.split(" ").head
 
-    driver.get(s"https://capture.anu.edu.au/ess/echo/presentation/$tag/mediacontent.m4v")
+  // https://capture.anu.edu.au:8443/ess/echocenter/index.jsp?sectionId=7695cb54-9541-4553-bca9-fabfc508ef6b
+  // https://capture.anu.edu.au:8443/ess/client/api/sections/7695cb54-9541-4553-bca9-fabfc508ef6b/section-data.json?timeZone=Australia/Sydney&pageIndex=1&pageSize=1000&sortOrder=desc&showUnavailable=true&timeZone=Australia/Sydney
 
-    // hang around waiting for media.m4v.part to appear and then disappear, then rename the file, then download the next one ...
-    while (!(new File("media.m4v").exists)) {
-      println("waiting for download to begin...")
-      Thread.sleep(500)
+  driver.get("https://capture.anu.edu.au:8443/ess/client/api/sections/" + driver.getCurrentUrl.split("=")(1) + "/section-data.json?timeZone=Australia/Sydney&pageIndex=1&pageSize=1000&sortOrder=desc&showUnavailable=true&timeZone=Australia/Sydney")
+  val json = driver.getPageSource
+  val uuidRegex = """"uuid":"([0-9a-z-]*)"""".r
+  val dateRegex = """"startTime":"([0-9-]*)T""".r
+  val uuids = uuidRegex.findAllMatchIn(json.drop(json.indexOf("pageContents"))).map(_.group(1)).toList
+  val dates = dateRegex.findAllMatchIn(json.drop(json.indexOf("pageContents"))).map(_.group(1)).toList
+
+  for ((uuid, date) <- uuids.zip(dates)) println(uuid + " " + date)
+
+  val year = Calendar.getInstance.get(Calendar.YEAR)
+
+  for ((uuid, date) <- uuids.zip(dates)) yield {
+
+    val filename = course + "_" + date + ".m4v"
+
+    if (!new File(filename).exists) {
+      driver.get(s"https://capture.anu.edu.au/ess/echo/presentation/$uuid/mediacontent.m4v")
+
+      // hang around waiting for media.m4v.part to appear and then disappear, then rename the file, then download the next one ...
+      while (!(new File("media.m4v").exists)) {
+        println("waiting for download to begin...")
+        Thread.sleep(500)
+      }
+      while ((new File("media.m4v.part").exists)) {
+        println("waiting for download to end...")
+        Thread.sleep(1000)
+      }
+      new File("media.m4v").renameTo(new File(filename))
+    } else {
+      println(s"Skipping $filename, already downloaded.")
     }
-    while ((new File("media.m4v.part").exists)) {
-      println("waiting for download to end...")
-      Thread.sleep(1000)
-    }
-    new File("media.m4v").renameTo(new File(s"echo360-$id-$tag.m4v"))
   }
 
 }
