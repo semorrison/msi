@@ -37,7 +37,7 @@ object BuildSettings {
 
 object OneJar {
     import com.github.retronym.SbtOneJar._
-    val settings = oneJarSettings ++ Seq(exportJars := true, mainClass in oneJar := Some("au.edu.anu.maths.TodayInG35"))
+    val settings = oneJarSettings ++ Seq(exportJars := true, mainClass in oneJar := Some("au.edu.anu.maths.DownloadEchos"))
 }
 
 object Resolvers {
