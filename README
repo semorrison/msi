@@ -1,3 +1,6 @@
+Some scripts for doing useful things at MSI. The most useful is a script which downloads all Echo 360 recordings associated to a Wattle course.
+
+
 This is all Scala code; best edited in eclipse.
 
 Run "./sbt update eclipse" to build the configuration files for eclipse.
