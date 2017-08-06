@@ -1,0 +1,3 @@
+[submodule "show-penultimate-page"]
+	path = show-penultimate-page
+	url = git@github.com:semorrison/show-penultimate-page.git
