@@ -3,3 +3,7 @@
 .classpath
 .project
 target
+
+wattle.passwd
+
+*.m4v

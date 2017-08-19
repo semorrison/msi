@@ -1,0 +1,5 @@
+for file in `ls *.m4v`; do 
+  echo $file
+  ffmpeg -i $file 2>&1 | grep Duration;  
+  ffmpeg -i $file 2>&1 | grep Stream; 
+done
